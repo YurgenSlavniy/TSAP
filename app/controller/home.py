@@ -1,8 +1,8 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 
 bp = Blueprint("home", __name__)
 
-
+# Отображение страницы ./view/home.html
 @bp.route("/")
 def index()-> str:
-    return "start page"
+    return render_template("home.html")

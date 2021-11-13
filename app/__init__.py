@@ -16,8 +16,9 @@ controllers = [
     home,
 ]
 
+
 def create_app()-> "flask":
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="web", template_folder="view")
 
     for c in controllers:
         app.register_blueprint(c)
