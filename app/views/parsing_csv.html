@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+{% block title %}Site-Name!{% endblock %}
+{% block content %}
+<h4>Parser Page!</h4>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div style="color: red;">{{message}}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div>
+    {% if rows %}
+    <ul>
+        <li><a href="/drop/{{drop_name}}">Удалить таблицу и файл?</a></li>
+    </ul>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата</th>
+                <th>TradeID</th>
+                <th>Тип</th>
+                <th>Пара</th>
+                <th>Кол-во</th>
+                <th>Цена</th>
+                <th>Сумма</th>
+                <th>Тип комиссии</th>
+                <th>Размер комиссии</th>
+                <th>Комиссия %</th>
+            </tr>
+        </thead>
+        {% for row in rows %}
+        <tr>
+            {% for el in row %}
+            <td>{{ el }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

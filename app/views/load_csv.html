@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block title %}Site-Name!{% endblock %}
+{% block content %}
+<h4>Загрузка CSV</h4>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for message in messages %}
+    <div style="color: red;">{{message}}</div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+<form action="/upload/csv/file" method="POST" enctype=multipart/form-data> 
+    <div class="file-field input-field">
+      <div class="btn">
+        <span>File</span>
+        <input type=file name=file>
+      </div>
+      <div class="file-path-wrapper">
+        <input class="file-path validate" type="text">
+      </div>
+    </div>
+    <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+        <i class="material-icons right">send</i>
+    </button>
+</form>
+{% endblock %}
