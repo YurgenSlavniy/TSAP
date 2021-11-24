@@ -11,34 +11,27 @@
 {% endwith %}
 
 <div>
-    {% if rows %}
+    {% if stat %}
     <ul>
         <li><a href="/drop/{{drop_name}}">Удалить таблицу и файл?</a></li>
     </ul>
-    <table class="responsive-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Дата</th>
-                <th>TradeID</th>
-                <th>Тип</th>
-                <th>Пара</th>
-                <th>Кол-во</th>
-                <th>Цена</th>
-                <th>Сумма</th>
-                <th>Тип комиссии</th>
-                <th>Размер комиссии</th>
-                <th>Комиссия %</th>
-            </tr>
-        </thead>
-        {% for row in rows %}
-        <tr>
-            {% for el in row %}
-            <td>{{ el }}</td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </table>
+    <h5>Статистика торговых операций на бирже:</h5>
+    <p>
+        1) общее колличество сделок <u><b>{{ stat['total'] }}</b></u> исполненых ордеров.
+        из них: BUY <u><b>{{ stat['total_buy'] }}</b></u>, SELL <u><b>{{ stat['total_sell'] }}</b></u>.
+    <br>
+        2) колличество торговых пар в которых велись торги <u><b>{{ stat['total_pair'] }}</b></u> торговых пар.
+    <br>
+        3) топ 5 торговых пар где было совершено больше всего сделок
+        {% if top_pairs %}
+            <ol>
+                {% for info in top_pairs %}
+                    <li>{{ info['current_pair'] }}: <b>{{ info['total'] }}</b></li>
+                {% endfor %}
+            </ol>
+        {% endif %}
+    </p>
+
     {% endif %}
 </div>
 {% endblock %}
