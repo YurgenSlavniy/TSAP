@@ -9,7 +9,6 @@
 {% endfor %}
 {% endif %}
 {% endwith %}
-
 <div>
     {% if stat %}
     <ul>
@@ -17,21 +16,78 @@
     </ul>
     <h5>Статистика торговых операций на бирже:</h5>
     <p>
-        1) общее колличество сделок <u><b>{{ stat['total'] }}</b></u> исполненых ордеров.
+        1) Общее колличество сделок <u><b>{{ stat['total'] }}</b></u> исполненых ордеров.
         из них: BUY <u><b>{{ stat['total_buy'] }}</b></u>, SELL <u><b>{{ stat['total_sell'] }}</b></u>.
-    <br>
-        2) колличество торговых пар в которых велись торги <u><b>{{ stat['total_pair'] }}</b></u> торговых пар.
-    <br>
-        3) топ 5 торговых пар где было совершено больше всего сделок
+        <br>
+        2) Колличество торговых пар в которых велись торги <u><b>{{ stat['total_pair'] }}</b></u> торговых пар.
+        <br>
+        3) Топ 5 торговых пар где было совершено больше всего сделок
         {% if top_pairs %}
-            <ol>
+        <table>
+            <tbody>
                 {% for info in top_pairs %}
-                    <li>{{ info['current_pair'] }}: <b>{{ info['total'] }}</b></li>
+                <tr>
+                    <td>{{ info['current_pair'] }}</td>
+                    <td>{{ info['total'] }}</td>
+                </tr>
                 {% endfor %}
-            </ol>
+            </tbody>
+        </table>
         {% endif %}
-    </p>
+        <br>
+        4) Топ 5 сделок по объему в рублях
+        {% if top_deals_rub %}
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th>колличество</th>
+                    <th>цена (руб)</th>
+                    <th>объем (руб)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for info in top_deals_rub %}
+                <tr>
+                    <td>{{ info['date_time'] }}</td>
+                    <td>{{ info['order_type'].upper() }}</td>
+                    <td>{{ info['current_pair'] }}</td>
+                    <td>{{ info['quanity'] }}</td>
+                    <td>{{ info['price'] }}</td>
+                    <td>{{ info['order_value'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
 
+        <br>
+        5) Анализ 5 торговой пары из позиции отчета №3 SMART_RUB
+        <ul>
+            <li>
+                - Количество сделок в паре <b><u>{{ pair_info['total_deals'] }}</u></b>
+                из них BUY <b><u>{{ pair_info['total_buy'] }}</u></b> 
+                и SELL <u><b>{{ pair_info['total_sell'] }}</b></u>
+            </li>
+            <li>
+                - Kоличество сделок BUY за цену 0.34 руб SMART_RUB. 
+                <u><b>{{ pair_info['fixed_price_buy'] }}</b></u>
+            </li>
+            <li>
+                - Kоличество сделок SELL за цену 0.35 руб SMART_RUB. 
+                <u><b>{{ pair_info['fixed_price_sell'] }}</b></u>
+            </li>
+            <li>
+                - Объем всех BUY ордеров <u><b>{{ pair_info['val_buy'] }}</b></u> РУБ
+            </li>
+            <li>
+                - Объем всех SELL ордеров <u><b>{{ pair_info['val_sell'] }}</b></u> РУБ
+            </li>
+        </ul>
+    </p>
+    <br><br>
     {% endif %}
 </div>
 {% endblock %}

@@ -83,7 +83,7 @@ def parsing_file(file)-> str:
     file = os.path.join(current_app.config['UPLOAD_FOLDER'], file)
 
     query1 = f'''
-    select id, 
+    select 
         (select count(id) from {table_name}) as total,
         (select count(id) from {table_name} where order_type = 'buy') as total_buy,
         (select count(id) from {table_name} where order_type = 'sell') as total_sell,
@@ -98,28 +98,81 @@ def parsing_file(file)-> str:
     ORDER BY total DESC
     LIMIT 5
     '''
-    row = False
+
+    query3 = f'''
+    SELECT date_time, order_type, current_pair, quanity, price, order_value 
+    FROM {table_name}
+    WHERE current_pair LIKE '%RUB' 
+    ORDER BY order_value DESC
+    LIMIT 5
+    '''
+
+    query4 = f'''
+    SELECT 
+        (SELECT count(id) FROM {table_name} WHERE current_pair = 'SMART_RUB') AS total_deals,
+        (SELECT count(id) 
+            FROM {table_name} WHERE order_type = 'buy' 
+            AND current_pair = 'SMART_RUB') as total_buy,
+        (SELECT count(id) 
+            FROM {table_name}
+            WHERE order_type = 'sell' 
+            AND current_pair = 'SMART_RUB') as total_sell,
+        (SELECT count(id) 
+            FROM {table_name} 
+            WHERE order_type = 'buy' 
+            AND current_pair = 'SMART_RUB'
+            AND price = 0.35) as fixed_price_buy,
+        (SELECT count(id) 
+            FROM {table_name}
+            WHERE order_type = 'sell' 
+            AND current_pair = 'SMART_RUB'
+            AND price = 0.36) as fixed_price_sell,
+        (SELECT sum(order_value) 
+            FROM {table_name}
+            WHERE order_type = 'buy' 
+            AND current_pair = 'SMART_RUB') as val_buy,
+        (SELECT sum(order_value) 
+            FROM {table_name}
+            WHERE order_type = 'sell' 
+            AND current_pair = 'SMART_RUB') as val_sell
+    FROM {table_name}
+    LIMIT 1
+    '''
+
+    total_stat = False
     top_pairs = False
+    top_deals_rub = False
+    pair_info = False
+
     try:
         with mysql.connector.connect(**DBCONFIG) as conn:
             with conn.cursor(dictionary=True) as cursor:
                 cursor.execute(query1)
-                row = cursor.fetchone()
+                total_stat = cursor.fetchone()
 
                 cursor.execute(query2)
                 top_pairs = cursor.fetchall()
 
+                cursor.execute(query3)
+                top_deals_rub = cursor.fetchall()
+
+                cursor.execute(query4)
+                pair_info = cursor.fetchone()
+
     except mysql.connector.Error as e:
         print(e)
 
-    print('====>', row)
-    print('+++++>', top_pairs)
+    # print('====>', total_stat)
+    # print('+++++>', top_pairs)
+    # print('*****>', top_deals_rub)
+    # print('/////>', pair_info)
 
-    if row:
+    if total_stat:
         return render_template(
             "parsing_csv.html",
             drop_name=table_name,
-            stat=row, top_pairs=top_pairs
+            stat=total_stat, top_pairs=top_pairs,
+            top_deals_rub=top_deals_rub, pair_info=pair_info
         )
     else:
         flash("Данные отсутствуют")
