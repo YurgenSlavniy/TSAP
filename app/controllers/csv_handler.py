@@ -76,9 +76,10 @@ def upload_file()-> None:
     flash("Формат файла должен иметь расширение .csv")
     return redirect(url_for("csv_handler.show_load_page"))
 
-
+@bp.route("/parsing/<file>/<pair>/<buyprice>/<sellprice>")
+@bp.route("/parsing/<file>/<pair>")
 @bp.route("/parsing/<file>")
-def parsing_file(file)-> str:
+def parsing_file(file, pair=None, buyprice=0, sellprice=0)-> str:
     table_name = file.split(".")[0]
     file = os.path.join(current_app.config['UPLOAD_FOLDER'], file)
 
@@ -109,32 +110,32 @@ def parsing_file(file)-> str:
 
     query4 = f'''
     SELECT 
-        (SELECT count(id) FROM {table_name} WHERE current_pair = 'SMART_RUB') AS total_deals,
+        (SELECT count(id) FROM {table_name} WHERE current_pair = '{pair}') AS total_deals,
         (SELECT count(id) 
             FROM {table_name} WHERE order_type = 'buy' 
-            AND current_pair = 'SMART_RUB') as total_buy,
+            AND current_pair = '{pair}') as total_buy,
         (SELECT count(id) 
             FROM {table_name}
             WHERE order_type = 'sell' 
-            AND current_pair = 'SMART_RUB') as total_sell,
+            AND current_pair = '{pair}') as total_sell,
         (SELECT count(id) 
             FROM {table_name} 
             WHERE order_type = 'buy' 
-            AND current_pair = 'SMART_RUB'
-            AND price = 0.35) as fixed_price_buy,
+            AND current_pair = '{pair}'
+            AND price = {buyprice}) as fixed_price_buy,
         (SELECT count(id) 
             FROM {table_name}
             WHERE order_type = 'sell' 
-            AND current_pair = 'SMART_RUB'
-            AND price = 0.36) as fixed_price_sell,
+            AND current_pair = '{pair}'
+            AND price = {sellprice}) as fixed_price_sell,
         (SELECT sum(order_value) 
             FROM {table_name}
             WHERE order_type = 'buy' 
-            AND current_pair = 'SMART_RUB') as val_buy,
+            AND current_pair = '{pair}') as val_buy,
         (SELECT sum(order_value) 
             FROM {table_name}
             WHERE order_type = 'sell' 
-            AND current_pair = 'SMART_RUB') as val_sell
+            AND current_pair = '{pair}') as val_sell
     FROM {table_name}
     LIMIT 1
     '''
@@ -156,13 +157,15 @@ def parsing_file(file)-> str:
                 cursor.execute(query3)
                 top_deals_rub = cursor.fetchall()
 
-                cursor.execute(query4)
-                pair_info = cursor.fetchone()
+                if pair:
+                    cursor.execute(query4)
+                    pair_info = cursor.fetchone()
+                    pair_info['pair_name'] = pair
 
     except mysql.connector.Error as e:
         print(e)
 
-    # print('====>', total_stat)
+    # print('=====>', total_stat)
     # print('+++++>', top_pairs)
     # print('*****>', top_deals_rub)
     # print('/////>', pair_info)
@@ -170,9 +173,10 @@ def parsing_file(file)-> str:
     if total_stat:
         return render_template(
             "parsing_csv.html",
-            drop_name=table_name,
+            table_name=table_name,
             stat=total_stat, top_pairs=top_pairs,
-            top_deals_rub=top_deals_rub, pair_info=pair_info
+            top_deals_rub=top_deals_rub, pair_info=pair_info,
+            price={"buy": buyprice, "sell": sellprice}
         )
     else:
         flash("Данные отсутствуют")

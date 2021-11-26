@@ -12,7 +12,7 @@
 <div>
     {% if stat %}
     <ul>
-        <li><a href="/drop/{{drop_name}}">Удалить таблицу и файл?</a></li>
+        <li><a class="btn" href="/drop/{{table_name}}">Удалить таблицу и файл?</a></li>
     </ul>
     <h5>Статистика торговых операций на бирже:</h5>
     <p>
@@ -27,7 +27,11 @@
             <tbody>
                 {% for info in top_pairs %}
                 <tr>
-                    <td>{{ info['current_pair'] }}</td>
+                    <td>
+                        <a href="/parsing/{{table_name}}/{{ info['current_pair'] }}">
+                            {{ info['current_pair'] }}
+                        </a>
+                    </td>
                     <td>{{ info['total'] }}</td>
                 </tr>
                 {% endfor %}
@@ -64,7 +68,8 @@
         {% endif %}
 
         <br>
-        5) Анализ 5 торговой пары из позиции отчета №3 SMART_RUB
+        {% if pair_info %}
+        <h6>Анализ торговой пары {{ pair_info['pair_name'] }}</h6>
         <ul>
             <li>
                 - Количество сделок в паре <b><u>{{ pair_info['total_deals'] }}</u></b>
@@ -72,11 +77,15 @@
                 и SELL <u><b>{{ pair_info['total_sell'] }}</b></u>
             </li>
             <li>
-                - Kоличество сделок BUY за цену 0.34 руб SMART_RUB. 
+                - Kоличество сделок BUY за (Введите цену) 
+                <input style="width: 60px; height: 20px;" type="text" value="0.0" id="buy"> 
+                : <b>{{price['buy']}}</b> руб {{ pair_info['pair_name'] }}. 
                 <u><b>{{ pair_info['fixed_price_buy'] }}</b></u>
             </li>
             <li>
-                - Kоличество сделок SELL за цену 0.35 руб SMART_RUB. 
+                - Kоличество сделок SELL за (Введите цену)
+                <input style="width: 60px; height: 20px;" type="text" value="0.0" id="sell"> 
+                 : <b>{{price['sell']}}</b> руб {{ pair_info['pair_name'] }}. 
                 <u><b>{{ pair_info['fixed_price_sell'] }}</b></u>
             </li>
             <li>
@@ -86,6 +95,25 @@
                 - Объем всех SELL ордеров <u><b>{{ pair_info['val_sell'] }}</b></u> РУБ
             </li>
         </ul>
+            <div>
+                <a class="btn" href="/parsing/{{table_name}}/{{pair_info['pair_name']}}" id="analisys">
+                    Онализировать с новой ценой?
+                </a>
+            </div>
+            <script>
+                // Собирает url для анализа с новой ценой
+                var buy = 0.0
+                var sell = 0.0
+
+                document.querySelector("#buy").onchange = function(e) { buy = this.value }
+                document.querySelector("#sell").onchange = function(e) { sell = this.value }
+
+                document.querySelector("#analisys").onclick = function(e) {
+                    this.href = this.href + "/" + buy + "/" + sell
+                }
+        
+            </script>
+        {% endif %}
     </p>
     <br><br>
     {% endif %}
