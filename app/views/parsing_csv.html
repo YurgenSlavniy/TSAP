@@ -1,4 +1,6 @@
 {% extends 'layout.html' %}
+{# Для вывода переменных используются двойные скобки {{переменная}} #}
+
 {% block title %}Site-Name!{% endblock %}
 {% block content %}
 <h4>Parser Page!</h4>
@@ -16,6 +18,15 @@
     </ul>
     <h5>Статистика торговых операций на бирже:</h5>
     <p>
+        <h6>
+            <b>
+                {# step 6 #}
+                Анализ сделок во временном периоде 
+                с  {{ order_date['first'] }} 
+                по {{ order_date['last'] }}
+            </b>
+        </h6>
+
         1) Общее колличество сделок <u><b>{{ stat['total'] }}</b></u> исполненых ордеров.
         из них: BUY <u><b>{{ stat['total_buy'] }}</b></u>, SELL <u><b>{{ stat['total_sell'] }}</b></u>.
         <br>

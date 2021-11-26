@@ -83,6 +83,18 @@ def parsing_file(file, pair=None, buyprice=0, sellprice=0)-> str:
     table_name = file.split(".")[0]
     file = os.path.join(current_app.config['UPLOAD_FOLDER'], file)
 
+    # step 1
+    query = f'''
+    select
+        (select substring(date_time, 1, 8) from {table_name} 
+         order by trade_id 
+         limit 1) as first,
+         (select substring(date_time, 1, 8) from {table_name} 
+         order by trade_id desc
+         limit 1) as last
+    from {table_name}
+    '''
+
     query1 = f'''
     select 
         (select count(id) from {table_name}) as total,
@@ -144,6 +156,8 @@ def parsing_file(file, pair=None, buyprice=0, sellprice=0)-> str:
     top_pairs = False
     top_deals_rub = False
     pair_info = False
+    # step 2
+    order_date = None
 
     try:
         with mysql.connector.connect(**DBCONFIG) as conn:
@@ -162,6 +176,10 @@ def parsing_file(file, pair=None, buyprice=0, sellprice=0)-> str:
                     pair_info = cursor.fetchone()
                     pair_info['pair_name'] = pair
 
+                # step 3
+                cursor.execute(query)
+                order_date = cursor.fetchone()
+
     except mysql.connector.Error as e:
         print(e)
 
@@ -169,14 +187,21 @@ def parsing_file(file, pair=None, buyprice=0, sellprice=0)-> str:
     # print('+++++>', top_pairs)
     # print('*****>', top_deals_rub)
     # print('/////>', pair_info)
+    # print("@@@@>", order_date)
 
     if total_stat:
-        return render_template(
-            "parsing_csv.html",
+        return render_template("parsing_csv.html",
             table_name=table_name,
-            stat=total_stat, top_pairs=top_pairs,
-            top_deals_rub=top_deals_rub, pair_info=pair_info,
-            price={"buy": buyprice, "sell": sellprice}
+            stat=total_stat,
+            top_pairs=top_pairs,
+            top_deals_rub=top_deals_rub,
+            pair_info=pair_info,
+            price={
+                "buy": buyprice,
+                "sell": sellprice
+            },
+            # step 5
+            order_date=order_date
         )
     else:
         flash("Данные отсутствуют")
